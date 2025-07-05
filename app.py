@@ -26,7 +26,7 @@ class Config:
 app.config.from_object(Config)
 
 
-# === Enhanced Encoding Strategies ===
+#Encoding strategies 
 class EncoderError(Exception):
     """Custom exception for encoding errors"""
     pass
