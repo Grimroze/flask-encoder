@@ -1,188 +1,1158 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Secret Encoder/Decoder</title>
-  <style>
-    body {
-      background-color: #121212;
-      color: white;
-      font-family: 'Segoe UI', sans-serif;
-      text-align: center;
-      padding: 50px 20px;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRIMROZE - Advanced Encryption Suite</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    h1 {
-      font-size: 2.5rem;
-      font-weight: 600;
-      margin-bottom: 40px;
-      background: linear-gradient(to right, #8e2de2, #4a00e0);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #83f6f2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #5c020e 100%);
+            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --dark-bg: #0a0a0a;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --success: #00ff88;
+            --error: #ff4757;
+            --warning: #ffa502;
+        }
+        <!-- Custom Stylish Dropdown -->
 
-    form {
-      display: inline-block;
-      padding: 40px 50px;
-      border-radius: 20px;
-      background: rgba(255, 255, 255, 0.05);
-      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      max-width: 480px;
-      width: 100%;
-    }
+        .dropdown-container {
+          position: relative;
+          display: inline-block;
+          width: 100%;
+          max-width: 300px;
+          font-family: 'Segoe UI', sans-serif;
+        }
 
-    .inputGroup {
-      position: relative;
-      margin: 30px auto;
-      width: 100%;
-    }
+        .dropdown-label {
+          font-weight: bold;
+          display: block;
+          margin-bottom: 8px;
+          color: #333;
+        }
 
-    .inputGroup input,
-    .inputGroup select {
-      font-size: 1rem;
-      padding: 1.2rem 0.75rem 0.8rem 0.75rem;
-      display: block;
-      width: 100%;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 0.6rem;
-      background-color: rgba(45, 45, 45, 0.8);
-      color: white;
-      transition: border 0.3s ease;
-      appearance: none;
-    }
+        .dropdown-select {
+          appearance: none;
+          width: 100%;
+          padding: 12px 16px;
+          border: none;
+          border-radius: 12px;
+          background: linear-gradient(135deg, #6e8efb, #a777e3);
+          color: white;
+          font-size: 1rem;
+          font-weight: 500;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+          transition: 0.3s ease;
+          cursor: pointer;
+        }
 
-    .inputGroup label {
-      position: absolute;
-      left: 0.9rem;
-      top: 1.2rem;
-      padding: 0 0.25rem;
-      background-color: rgba(18, 18, 18, 1);
-      color: #aaa;
-      font-size: 0.9rem;
-      pointer-events: none;
-      transition: 0.2s ease all;
-    }
+        .dropdown-select:hover {
+          transform: scale(1.02);
+          box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
 
-    .inputGroup input:focus,
-    .inputGroup input:not(:placeholder-shown),
-    .inputGroup select:focus {
-      border-color: #8e2de2;
-    }
+        .dropdown-select:focus {
+          outline: none;
+          box-shadow: 0 0 0 3px rgba(167, 119, 227, 0.4);
+        }
 
-    .inputGroup input:focus + label,
-    .inputGroup input:not(:placeholder-shown) + label,
-    .inputGroup select:focus + label {
-      top: -0.6rem;
-      left: 0.7rem;
-      font-size: 0.75rem;
-      color: #8e2de2;
-    }
+        .dropdown-container::after {
+          content: "▼";
+          font-size: 0.8rem;
+          color: white;
+          position: absolute;
+          top: 50%;
+          right: 16px;
+          transform: translateY(-50%);
+          pointer-events: none;
+        }
+        body {
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-    .result {
-      margin-top: 30px;
-      font-size: 1.1rem;
-      color: #00ffcc;
-      word-break: break-word;
-    }
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 40%, rgba(120, 200, 255, 0.2) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+        }
 
-    .cssbuttons-io {
-      position: relative;
-      font-family: inherit;
-      font-weight: 500;
-      font-size: 18px;
-      letter-spacing: 0.05em;
-      border-radius: 0.8em;
-      cursor: pointer;
-      border: none;
-      background: linear-gradient(to right, #8e2de2, #4a00e0);
-      color: ghostwhite;
-      overflow: hidden;
-      margin-top: 30px;
-    }
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(1deg); }
+            66% { transform: translate(-20px, 20px) rotate(-1deg); }
+        }
 
-    .cssbuttons-io svg {
-      width: 1.2em;
-      height: 1.2em;
-      margin-right: 0.5em;
-    }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
 
-    .cssbuttons-io span {
-      position: relative;
-      z-index: 10;
-      transition: color 0.4s;
-      display: inline-flex;
-      align-items: center;
-      padding: 0.8em 1.2em 0.8em 1.05em;
-    }
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 0;
+        }
 
-    .cssbuttons-io::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: -10%;
-      width: 120%;
-      height: 100%;
-      background: #000;
-      transform: skew(30deg);
-      z-index: 0;
-      transition: transform 0.4s cubic-bezier(0.3, 1, 0.8, 1);
-    }
+        .logo {
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
 
-    .cssbuttons-io:hover::before {
-      transform: translate3d(100%, 0, 0);
-    }
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.5)); }
+            to { filter: drop-shadow(0 0 30px rgba(118, 75, 162, 0.8)); }
+        }
 
-    .cssbuttons-io:active {
-      transform: scale(0.95);
-    }
-  </style>
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+        /* Social Links */
+        .social-links {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            color: white;
+            text-decoration: none;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .social-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            transform: scale(0);
+            transition: transform 0.3s ease;
+            z-index: -1;
+        }
+
+        .social-link:hover::before {
+            transform: scale(1);
+        }
+
+        .social-link:hover {
+            transform: scale(1.1) rotate(5deg);
+            color: white;
+        }
+
+        .social-link.github {
+            background: linear-gradient(45deg, #333, #24292e);
+        }
+
+        .social-link.github::before {
+            background: linear-gradient(45deg, #24292e, #000);
+        }
+
+        .social-link.instagram {
+            background: linear-gradient(45deg, #405de6, #5851db, #b63783, #cc4458, #e1306c, #fd1d1d);
+        }
+
+        .social-link.instagram::before {
+            background: linear-gradient(45deg, #833ab4, #fd1d1d);
+        }
+
+        .social-link.linkedin {
+            background: linear-gradient(45deg, #0077b5, #0e76a8);
+        }
+
+        .social-link.linkedin::before {
+            background: linear-gradient(45deg, #0e76a8, #005885);
+        }
+
+        .social-link.email {
+            background: linear-gradient(45deg, #ea4335, #fbbc05);
+        }
+
+        .social-link.email::before {
+            background: linear-gradient(45deg, #fbbc05, #ea4335);
+        }
+        .tech-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            background: var(--accent-gradient);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--dark-bg);
+            margin: 5px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Main content layout */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary-gradient);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover::before {
+            transform: translateX(0);
+        }
+
+        .card:hover {
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0 25px 50px rgba(118, 75, 162, 0.2);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-icon {
+            font-size: 1.2rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Form styles */
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: 'Monaco', 'Consolas', monospace;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .form-input::placeholder, .form-textarea::placeholder {
+            color: var(--text-secondary);
+        }
+
+        /* Mode toggle */
+        .mode-toggle {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 20px;
+        }
+
+        .mode-option {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .mode-option.active {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .mode-option:not(.active):hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            border: 1px solid var(--card-border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-icon {
+            font-size: 1.1rem;
+        }
+
+        /* Loading state */
+        .loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .loading .btn-icon {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Results */
+        .result-container {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid var(--success);
+            background: rgba(6, 60, 34, 0.1);
+            position: relative;
+            animation: slideIn 0.5s ease;
+        }
+
+        .error-container {
+            border-left-color: var(--error);
+            background: rgba(255, 71, 87, 0.1);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .result-title {
+            font-weight: 600;
+            color: var(--success);
+        }
+
+        .error-container .result-title {
+            color: var(--error);
+        }
+
+        .result-text {
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            word-break: break-all;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+
+        /* Copy button */
+        .copy-btn {
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            background: var(--accent-gradient);
+            border: none;
+            border-radius: 6px;
+            color: var(--dark-bg);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Method info */
+        .method-info {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 3px solid var(--accent-gradient);
+        }
+
+        .method-description {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* History panel */
+        .history-panel {
+            grid-column: 1 / -1;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-gradient);
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(5px);
+        }
+
+        .history-text {
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .history-timestamp {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            background: var(--success);
+        }
+
+        .toast.error {
+            background: var(--error);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .logo {
+                font-size: 2.5rem;
+            }
+
+            .header {
+                padding: 20px 0;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-gradient);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-gradient);
+        }
+        /* 🔥 Stylish Dropdown Upgrade (Merged with Existing UI) */
+        .dropdown-container {
+            position: relative;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .dropdown-label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            display: block;
+        }
+
+        .dropdown-select {
+            appearance: none;
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            background: var(--accent-gradient);
+            color: var(--dark-bg);
+            font-size: 1rem;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 242, 254, 0.2);
+            transition: 0.3s ease;
+            border: none;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+        }
+
+        .dropdown-select:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 15px rgba(0, 242, 254, 0.3);
+        }
+
+        .dropdown-select:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 242, 254, 0.4);
+        }
+
+        .dropdown-container::after {
+            content: "▼";
+            font-size: 0.8rem;
+            color: var(--dark-bg);
+            position: absolute;
+            top: 50%;
+            right: 16px;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+    </style>
 </head>
 <body>
-  <h1><\> GRIMROZE</h1>
-  <h2>Encrypt your messages</h2>
+    <div class="bg-animation"></div>
 
-  <form method="POST">
-    <div class="inputGroup">
-      <input type="text" name="message" required placeholder=" " autocomplete="off">
-      <label>Enter your message</label>
+    <div class="container">
+        <header class="header">
+            <h1 class="logo">CodeMorph</h1>
+            <p class="subtitle">Advanced Encryption Suite by grimroze </p>
+<!--            <div>-->
+<!--                <span class="tech-badge">AES-256</span>-->
+<!--                <span class="tech-badge">PBKDF2</span>-->
+<!--                <span class="tech-badge">HMAC-SHA256</span>-->
+<!--                <span class="tech-badge">Multi-Layer</span>-->
+<!--            </div>-->
+        </header>
+
+        <main class="main-content">
+            <!-- Input Panel -->
+                        <div class="social-links">
+                              <a href="https://github.com/Grimroze" target="_blank" class="social-link github" title="GitHub">
+                                  <i class="fab fa-github"></i>
+                              </a>
+                              <a href="https://instagram.com/grimroze" target="_blank" class="social-link instagram" title="Instagram">
+                                  <i class="fab fa-instagram"></i>
+                              </a>
+                              <a href="https://www.linkedin.com/in/goldi-soni-01b967296/" target="_blank" class="social-link linkedin" title="LinkedIn">
+                                  <i class="fab fa-linkedin"></i>
+                              </a>
+                              <a href="grimissher@gmail.com" class="social-link email" title="grimissher@gmail.com">
+                                  <i class="fas fa-envelope"></i>
+                              </a>
+                          </div>
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-lock card-icon"></i>
+                    Encryption Control
+                </div>
+
+                <form id="encryptionForm">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-message"></i> Message
+                        </label>
+                        <textarea class="form-textarea" id="messageInput" placeholder="Enter your secret message here..." required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-key"></i> Secret Key
+                        </label>
+                        <input type="password" class="form-input" id="keyInput" placeholder="Enter your encryption key..." required>
+                        <div style="margin-top: 8px;">
+                            <small style="color: var(--text-secondary);">
+                                <i class="fas fa-info-circle"></i>
+                                Minimum 3 characters. Use a strong, memorable key.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-shield-alt"></i> Encryption Method
+                        </label>
+                        <select class="form-select" id="methodSelect">
+                            <option value="advanced">🔒 Advanced Multi-Layer</option>
+                            <option value="vigenere">📜 Vigenère Cipher</option>
+                            <option value="xor">⚡ XOR Cipher</option>
+                            <option value="caesar">🏛️ Caesar Cipher</option>
+                        </select>
+                    </div>
+
+                    <div class="method-info" id="methodInfo">
+                        <div class="method-description">
+                            Advanced multi-layer encryption with XOR, Caesar shift, and HMAC integrity verification for maximum security.
+                        </div>
+                    </div>
+
+                    <div class="mode-toggle">
+                        <div class="mode-option active" data-mode="encode">
+                            <i class="fas fa-lock"></i> Encrypt
+                        </div>
+                        <div class="mode-option" data-mode="decode">
+                            <i class="fas fa-unlock"></i> Decrypt
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 15px;">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-cog btn-icon"></i>
+                            <span id="actionText">Encrypt Message</span>
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="clearBtn">
+                            <i class="fas fa-trash btn-icon"></i>
+                            Clear All
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Results Panel -->
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-terminal card-icon"></i>
+                    Results & Analytics
+                </div>
+
+                <div id="resultsContainer">
+                    <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                        <i class="fas fa-rocket" style="font-size: 3rem; margin-bottom: 20px; opacity: 0.3;"></i>
+                        <p>Ready to encrypt your first message!</p>
+                        <p style="font-size: 0.9rem; margin-top: 10px;">Enter your message and key to get started.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History Panel -->
+            <div class="card history-panel">
+                <div class="card-title">
+                    <i class="fas fa-history card-icon"></i>
+                    Recent Operations
+                    <button class="btn btn-secondary" id="clearHistoryBtn" style="margin-left: auto; padding: 8px 12px; font-size: 0.8rem;">
+                        <i class="fas fa-trash"></i>
+                        Clear History
+                    </button>
+                </div>
+
+                <div id="historyContainer">
+                    <div style="text-align: center; padding: 20px; color: var(--text-secondary);">
+                        <i class="fas fa-clock" style="font-size: 2rem; margin-bottom: 15px; opacity: 0.3;"></i>
+                        <p>No recent operations</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer style="text-align: center; padding: 40px 0; color: var(--text-secondary); border-top: 1px solid var(--card-border);">
+            <p>&copy; 2025 GRIMROZE Encryption Suite. Built with ❤️ some chai ☕</p>
+            <p style="font-size: 0.8rem; margin-top: 10px;">
+                <i class="fas fa-shield-alt"></i> Your data is processed locally and never stored on our servers.
+            </p>
+        </footer>
     </div>
 
-    <div class="inputGroup">
-      <input type="text" name="key" required placeholder=" " autocomplete="off">
-      <label>Enter secret key</label>
-    </div>
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
 
-    <div class="inputGroup">
-      <select name="mode" required>
-        <option value="" disabled selected hidden></option>
-        <option value="encode">Encode</option>
-        <option value="decode">Decode</option>
-      </select>
-      <label>Select Mode</label>
-    </div>
+    <script>
+        // Application state
+        let currentMode = 'encode';
+        let isLoading = false;
+        let operationHistory = JSON.parse(localStorage.getItem('grimroze_history') || '[]');
 
-    <button class="cssbuttons-io" type="submit">
-      <span>
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0 0h24v24H0z" fill="none"></path>
-          <path
-            d="M24 12l-5.657 5.657-1.414-1.414L21.172 12l-4.243-4.243 1.414-1.414L24 12zM2.828 12l4.243 4.243-1.414 1.414L0 12l5.657-5.657L7.07 7.757 2.828 12zm6.96 9H7.66l6.552-18h2.128L9.788 21z"
-            fill="currentColor"></path>
-        </svg>
-        Generate
-      </span>
-    </button>
-  </form>
+        // Method descriptions
+        const methodDescriptions = {
+            'advanced': 'Advanced multi-layer encryption with XOR, Caesar shift, and HMAC integrity verification for maximum security.',
+            'vigenere': 'Classic Vigenère cipher with enhanced key derivation using PBKDF2 for improved security.',
+            'xor': 'XOR cipher with secure key stretching and base64 encoding for reliable data transmission.',
+            'caesar': 'Enhanced Caesar cipher with cryptographic key derivation and printable ASCII character handling.'
+        };
 
-  {% if result %}
-    <div class="result">
-      <h3>Result:</h3>
-      <p>{{ result }}</p>
-    </div>
-  {% endif %}
+        // DOM elements
+        const form = document.getElementById('encryptionForm');
+        const messageInput = document.getElementById('messageInput');
+        const keyInput = document.getElementById('keyInput');
+        const methodSelect = document.getElementById('methodSelect');
+        const methodInfo = document.getElementById('methodInfo');
+        const modeOptions = document.querySelectorAll('.mode-option');
+        const actionText = document.getElementById('actionText');
+        const clearBtn = document.getElementById('clearBtn');
+        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const historyContainer = document.getElementById('historyContainer');
+
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', function() {
+            updateHistory();
+            updateMethodInfo();
+
+            // Add event listeners
+            form.addEventListener('submit', handleSubmit);
+            clearBtn.addEventListener('click', clearForm);
+            clearHistoryBtn.addEventListener('click', clearHistory);
+            methodSelect.addEventListener('change', updateMethodInfo);
+
+            // Mode toggle listeners
+            modeOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (!isLoading) {
+                        switchMode(this.dataset.mode);
+                    }
+                });
+            });
+
+            // Auto-resize textarea
+            messageInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 300) + 'px';
+            });
+        });
+
+        // Handle form submission
+        async function handleSubmit(e) {
+            e.preventDefault();
+
+            if (isLoading) return;
+
+            const message = messageInput.value.trim();
+            const key = keyInput.value.trim();
+            const method = methodSelect.value;
+
+            if (!message || !key) {
+                showToast('Please fill in all fields!', 'error');
+                return;
+            }
+
+            if (key.length < 3) {
+                showToast('Key must be at least 3 characters long!', 'error');
+                return;
+            }
+
+            setLoading(true);
+
+            try {
+                // Simulate API call (replace with actual API endpoint)
+                const response = await simulateAPICall({
+                    message: message,
+                    key: key,
+                    method: method
+                });
+
+                if (response.success) {
+                    displayResult(response.result, method, currentMode);
+                    addToHistory(message, response.result, method, currentMode);
+                    showToast(`Message ${currentMode}d successfully!`, 'success');
+                } else {
+                    showToast(response.error || 'Operation failed!', 'error');
+                }
+            } catch (error) {
+                showToast('Network error! Please try again.', 'error');
+                console.error('Error:', error);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // Simulate API call (replace with actual fetch to your Flask backend)
+        async function simulateAPICall(data) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    try {
+                        // This is a simplified simulation - replace with actual API call
+                        let result;
+                        if (currentMode === 'encode') {
+                            result = btoa(data.message + ':' + data.key).replace(/=/g, '');
+                        } else {
+                            try {
+                                result = atob(data.message + '=').split(':')[0];
+                            } catch {
+                                throw new Error('Invalid encoded message');
+                            }
+                        }
+
+                        resolve({
+                            success: true,
+                            result: result,
+                            method: data.method,
+                            timestamp: new Date().toISOString()
+                        });
+                    } catch (error) {
+                        resolve({
+                            success: false,
+                            error: error.message
+                        });
+                    }
+                }, 1000);
+            });
+        }
+
+        // Switch between encode/decode modes
+        function switchMode(mode) {
+            currentMode = mode;
+
+            modeOptions.forEach(option => {
+                option.classList.toggle('active', option.dataset.mode === mode);
+            });
+
+            actionText.textContent = mode === 'encode' ? 'Encrypt Message' : 'Decrypt Message';
+            messageInput.placeholder = mode === 'encode'
+                ? 'Enter your secret message here...'
+                : 'Enter encrypted message to decrypt...';
+        }
+
+        // Update method information
+        function updateMethodInfo() {
+            const method = methodSelect.value;
+            const description = methodDescriptions[method] || 'Select a method to see details.';
+            methodInfo.querySelector('.method-description').textContent = description;
+        }
+
+        // Display operation result
+        function displayResult(result, method, mode) {
+            const isSuccess = result && !result.startsWith('Error');
+            const containerClass = isSuccess ? 'result-container' : 'result-container error-container';
+
+            resultsContainer.innerHTML = `
+                <div class="${containerClass}">
+                    <div class="result-header">
+                        <span class="result-title">
+                            <i class="fas fa-${isSuccess ? 'check-circle' : 'exclamation-triangle'}"></i>
+                            ${isSuccess ? `${mode === 'encode' ? 'Encrypted' : 'Decrypted'} Result` : 'Error'}
+                        </span>
+                        ${isSuccess ? `<button class="copy-btn" onclick="copyToClipboard('${result}')">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>` : ''}
+                    </div>
+                    <div class="result-text">${result}</div>
+                    ${isSuccess ? `<div style="margin-top: 15px; font-size: 0.85rem; color: var(--text-secondary);">
+                        <i class="fas fa-info-circle"></i>
+                        Method: ${method.toUpperCase()} |
+                        Length: ${result.length} characters |
+                        Generated: ${new Date().toLocaleTimeString()}
+                    </div>` : ''}
+                </div>
+            `;
+        }
+
+        // Copy to clipboard
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Copied to clipboard!', 'success');
+            }).catch(() => {
+                showToast('Failed to copy!', 'error');
+            });
+        }
+
+        // Add operation to history
+        function addToHistory(original, result, method, mode) {
+            const operation = {
+                id: Date.now(),
+                original: original.substring(0, 50) + (original.length > 50 ? '...' : ''),
+                result: result.substring(0, 50) + (result.length > 50 ? '...' : ''),
+                method: method,
+                mode: mode,
+                timestamp: new Date().toLocaleString()
+            };
+
+            operationHistory.unshift(operation);
+
+            // Keep only last 10 operations
+            if (operationHistory.length > 10) {
+                operationHistory = operationHistory.slice(0, 10);
+            }
+
+            localStorage.setItem('grimroze_history', JSON.stringify(operationHistory));
+            updateHistory();
+        }
+
+        // Update history display
+        function updateHistory() {
+            if (operationHistory.length === 0) {
+                historyContainer.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: var(--text-secondary);">
+                        <i class="fas fa-clock" style="font-size: 2rem; margin-bottom: 15px; opacity: 0.3;"></i>
+                        <p>No recent operations</p>
+                    </div>
+                `;
+                return;
+            }
+
+            historyContainer.innerHTML = operationHistory.map(op => `
+                <div class="history-item">
+                    <div style="flex: 1;">
+                        <div style="font-size: 0.8rem; color: var(--accent-gradient); margin-bottom: 5px;">
+                            <i class="fas fa-${op.mode === 'encode' ? 'lock' : 'unlock'}"></i>
+                            ${op.method.toUpperCase()} ${op.mode.toUpperCase()}
+                        </div>
+                        <div class="history-text">${op.mode === 'encode' ? op.original : op.result}</div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                        <button class="copy-btn" onclick="copyToClipboard('${op.result}')" style="margin-bottom: 5px;">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <div class="history-timestamp">${op.timestamp}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Clear form
+        function clearForm() {
+            if (isLoading) return;
+
+            form.reset();
+            resultsContainer.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                    <i class="fas fa-rocket" style="font-size: 3rem; margin-bottom: 20px; opacity: 0.3;"></i>
+                    <p>Ready to encrypt your first message!</p>
+                    <p style="font-size: 0.9rem; margin-top: 10px;">Enter your message and key to get started.</p>
+                </div>
+            `;
+            messageInput.style.height = 'auto';
+            showToast('Form cleared!', 'success');
+        }
+
+        // Clear history
+        function clearHistory() {
+            operationHistory = [];
+            localStorage.removeItem('grimroze_history');
+            updateHistory();
+            showToast('History cleared!', 'success');
+        }
+
+        // Set loading state
+        function setLoading(loading) {
+            isLoading = loading;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const icon = submitBtn.querySelector('.btn-icon');
+
+            if (loading) {
+                submitBtn.classList.add('loading');
+                icon.className = 'fas fa-spinner btn-icon';
+                actionText.textContent = 'Processing...';
+            } else {
+                submitBtn.classList.remove('loading');
+                icon.className = 'fas fa-cog btn-icon';
+                actionText.textContent = currentMode === 'encode' ? 'Encrypt Message' : 'Decrypt Message';
+            }
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+                ${message}
+            `;
+
+            document.getElementById('toastContainer').appendChild(toast);
+
+            setTimeout(() => toast.classList.add('show'), 100);
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Add some cool effects
+        document.addEventListener('mousemove', function(e) {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = (y - centerY) / 10;
+                    const rotateY = (centerX - x) / 10;
+
+                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
+                }
+            });
+        });
+
+        document.addEventListener('mouseleave', function() {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)';
+            });
+        });
+    </script>
 </body>
 </html>
